@@ -1,0 +1,21 @@
+
+# Compiled output from the build
+/target/
+
+# Log files
+*.log
+
+.idea/
+*.iml
+*.iws
+.project
+.classpath
+.factorypath
+.settings/
+.sts4-cache/
+.vscode/
+
+.DS_Store
+Thumbs.db
+
+application-local.properties    
