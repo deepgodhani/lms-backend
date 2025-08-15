@@ -1,33 +1,57 @@
 package com.versionxd.lms.backend.controller;
 
+import com.versionxd.lms.backend.dto.AuthResponse;
+import com.versionxd.lms.backend.dto.LoginRequest;
 import com.versionxd.lms.backend.dto.RegisterRequest;
-import com.versionxd.lms.backend.model.User;
 import com.versionxd.lms.backend.service.AuthService;
-import jakarta.validation.Valid;
+import com.versionxd.lms.backend.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
-@RequestMapping("/api/auth") // Base URL for all endpoints in this controller
+
+@RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
+    private final JwtService jwtService;
 
+    @Autowired
+    public AuthController(AuthService authService, JwtService jwtService) {
+        this.authService = authService;
+        this.jwtService = jwtService;
+    }
+
+    /**
+     * Handles the user registration request.
+     * The @Valid annotation triggers the validation rules in RegisterRequest.
+     */
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
-        try {
-            User registeredUser = authService.register(registerRequest);
-            // For now, we just return a success message.
-            // Later, we can return a proper response DTO.
-            return ResponseEntity.ok("User registered successfully! ID: " + registeredUser.getId());
-        } catch (IllegalArgumentException e) {
-            // This catches the "email already in use" error from our service.
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        authService.register(registerRequest);
+
+        // Return a clean success response with a 201 CREATED status
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "User registered successfully!");
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
+        Authentication authentication = authService.login(loginRequest);
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String token = jwtService.generateToken(userDetails);
+        return ResponseEntity.ok(new AuthResponse(token));
     }
 }

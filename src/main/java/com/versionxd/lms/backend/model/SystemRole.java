@@ -1,6 +1,22 @@
 package com.versionxd.lms.backend.model;
 
-public enum SystemRole {
-    USER,
-    ADMIN
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Entity
+@Table(name = "system_roles")
+@Data
+public class SystemRole {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // 1. Change the type to our new enum
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20, unique = true, nullable = false)
+    private SystemRoleName name;
+
+    // @ManyToMany(mappedBy = "systemRoles")
+    // private Set<User> users = new HashSet<>();
 }
