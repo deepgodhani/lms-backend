@@ -11,12 +11,14 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    // Find a user by their email address
     Optional<User> findByEmail(String email);
+
     boolean existsByEmail(String email);
 
-    // This query fetches the user and explicitly joins and loads the systemRoles collection
-    // to prevent LazyInitializationException in the security context.
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.systemRoles WHERE u.email = :email")
+    // --- UPDATED QUERY ---
+    // This query now fetches BOTH the systemRoles and the enrollments collections.
+    // This creates a fully initialized User object for the security context,
+    // preventing any LazyInitializationExceptions down the line.
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.systemRoles LEFT JOIN FETCH u.enrollments WHERE u.email = :email")
     Optional<User> findByEmailWithRoles(@Param("email") String email);
 }

@@ -1,5 +1,7 @@
 package com.versionxd.lms.backend.controller;
 
+import java.util.List;
+
 import com.versionxd.lms.backend.dto.CreateCourseRequest;
 import com.versionxd.lms.backend.model.Course;
 import com.versionxd.lms.backend.model.User;
@@ -33,5 +35,11 @@ public class CourseController {
     public ResponseEntity<?> joinCourse(@PathVariable Long courseId, @AuthenticationPrincipal User currentUser) {
         courseService.joinCourse(courseId, currentUser);
         return ResponseEntity.ok().body("Successfully joined the course.");
+    }
+
+    @GetMapping("/all-courses")
+    public ResponseEntity<List<Course>> getAllCourses() {
+        List<Course> courses = courseService.getAllCourses();
+        return ResponseEntity.ok(courses);
     }
 }

@@ -1,18 +1,22 @@
 package com.versionxd.lms.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.Instant;
 
-@Data
-@NoArgsConstructor
+
 @Entity
-@Table(name = "course_enrollments", uniqueConstraints = {
-        // This ensures a user can only be enrolled in a course once.
-        @UniqueConstraint(columnNames = {"user_id", "course_id"})
-})
+@Table(name = "course_enrollments")
+@Getter
+@Setter
+@NoArgsConstructor
+@EqualsAndHashCode(of = "id")
+@ToString(exclude = {"user", "course"})
 public class CourseEnrollment {
 
     @Id
@@ -21,10 +25,13 @@ public class CourseEnrollment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
+    @JsonBackReference
+
     private Course course;
 
     @Enumerated(EnumType.STRING)

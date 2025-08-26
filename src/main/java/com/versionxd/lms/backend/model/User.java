@@ -1,7 +1,13 @@
 package com.versionxd.lms.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,10 +18,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Data
+
 @Entity
 @Table(name = "users")
-public class User implements UserDetails { // <-- IMPLEMENTS UserDetails
+@Getter
+@Setter
+@NoArgsConstructor
+@EqualsAndHashCode(of = "id")
+@ToString(exclude = "enrollments")
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,6 +45,7 @@ public class User implements UserDetails { // <-- IMPLEMENTS UserDetails
     private String password;
 
     @OneToMany(mappedBy = "user")
+    @JsonManagedReference
     private Set<CourseEnrollment> enrollments = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -43,7 +55,6 @@ public class User implements UserDetails { // <-- IMPLEMENTS UserDetails
     private Set<SystemRole> systemRoles = new HashSet<>();
 
 
-    // --- UserDetails Methods Implementation ---
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -55,7 +66,6 @@ public class User implements UserDetails { // <-- IMPLEMENTS UserDetails
 
     @Override
     public String getUsername() {
-        // Our "username" is the email address.
         return this.email;
     }
 
@@ -66,21 +76,21 @@ public class User implements UserDetails { // <-- IMPLEMENTS UserDetails
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; // Or add logic for this
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // Or add logic for this
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // Or add logic for this
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return true; // Or add logic for this
+        return true;
     }
 }

@@ -1,5 +1,7 @@
 package com.versionxd.lms.backend.service;
 
+import java.util.List;
+
 import com.versionxd.lms.backend.dto.CreateCourseRequest;
 import com.versionxd.lms.backend.exception.CourseNotFoundException;
 import com.versionxd.lms.backend.exception.UserAlreadyEnrolledException;
@@ -67,4 +69,9 @@ public class CourseService {
         CourseEnrollment enrollment = new CourseEnrollment(managedStudent, course, Role.STUDENT);
         return courseEnrollmentRepository.save(enrollment);
     }
+
+    public List<Course> getAllCourses() {
+        return courseRepository.findAll();
+    }
+
 }
