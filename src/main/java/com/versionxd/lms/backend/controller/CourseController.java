@@ -9,6 +9,7 @@ import com.versionxd.lms.backend.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,5 +42,12 @@ public class CourseController {
     public ResponseEntity<List<Course>> getAllCourses() {
         List<Course> courses = courseService.getAllCourses();
         return ResponseEntity.ok(courses);
+    }
+
+    @GetMapping("/{courseId}")
+    @PreAuthorize("@courseService.isUserEnrolled(#courseId, principal.username)")
+    public ResponseEntity<Course> getCourseById(@PathVariable Long courseId) {
+        Course course = courseService.getCourseById(courseId);
+        return ResponseEntity.ok(course);
     }
 }

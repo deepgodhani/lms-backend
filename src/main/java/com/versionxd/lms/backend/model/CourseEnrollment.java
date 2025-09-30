@@ -1,6 +1,7 @@
 package com.versionxd.lms.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.EqualsAndHashCode;
@@ -17,6 +18,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
 @ToString(exclude = {"user", "course"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CourseEnrollment {
 
     @Id

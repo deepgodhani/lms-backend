@@ -74,4 +74,15 @@ public class CourseService {
         return courseRepository.findAll();
     }
 
+    public Course getCourseById(Long courseId) {
+        return courseRepository.findById(courseId)
+                               .orElseThrow(() -> new CourseNotFoundException("Course not found with ID: " + courseId));
+    }
+
+    public boolean isUserEnrolled(Long courseId, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                                  .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + userEmail));
+        return courseEnrollmentRepository.findByUser_IdAndCourse_Id(user.getId(), courseId).isPresent();
+    }
+
 }

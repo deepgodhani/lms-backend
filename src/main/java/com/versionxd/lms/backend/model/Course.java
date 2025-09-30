@@ -1,5 +1,6 @@
 package com.versionxd.lms.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,7 +17,8 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = "enrollments")
+@ToString(exclude = {"enrollments", "modules"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Course {
 
     @Id
@@ -32,4 +34,8 @@ public class Course {
     @OneToMany(mappedBy = "course")
     @JsonManagedReference
     private Set<CourseEnrollment> enrollments = new HashSet<>();
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private Set<Module> modules = new HashSet<>();
 }

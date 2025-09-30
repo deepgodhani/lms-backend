@@ -15,10 +15,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmail(String email);
 
-    // --- UPDATED QUERY ---
-    // This query now fetches BOTH the systemRoles and the enrollments collections.
-    // This creates a fully initialized User object for the security context,
-    // preventing any LazyInitializationExceptions down the line.
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.systemRoles LEFT JOIN FETCH u.enrollments WHERE u.email = :email")
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.systemRoles WHERE u.email = :email")
     Optional<User> findByEmailWithRoles(@Param("email") String email);
+
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.enrollments WHERE u.id = :id")
+    Optional<User> findByIdWithEnrollments(@Param("id") Long id);
 }
