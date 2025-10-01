@@ -24,7 +24,6 @@ public class ModuleService {
 
     @Transactional
     public ModuleDTO createModule(Long courseId, ModuleDTO moduleDTO) {
-        // 1. Find the parent course
         Course course = courseRepository.findById(courseId)
                                         .orElseThrow(() -> new CourseNotFoundException("Course not found with id: " + courseId));
 

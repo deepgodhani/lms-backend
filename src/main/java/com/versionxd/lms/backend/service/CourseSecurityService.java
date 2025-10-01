@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.versionxd.lms.backend.model.Quiz;
+import com.versionxd.lms.backend.repository.QuizRepository;
+
 @Service("courseSecurityService")
 public class CourseSecurityService {
 
@@ -29,6 +32,9 @@ public class CourseSecurityService {
 
     @Autowired
     private LessonRepository lessonRepository;
+
+    @Autowired
+    private QuizRepository quizRepository;
 
     public boolean isInstructor(Long courseId, String userEmail) {
         User user = userRepository.findByEmail(userEmail)
@@ -54,6 +60,15 @@ public class CourseSecurityService {
                                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found"));
 
         Long courseId = lesson.getModule().getCourse().getId();
+        return isInstructor(courseId, userEmail);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isInstructorForQuiz(Long quizId, String userEmail) {
+        Quiz quiz = quizRepository.findById(quizId)
+                                  .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz not found"));
+
+        Long courseId = quiz.getCourse().getId();
         return isInstructor(courseId, userEmail);
     }
 }
