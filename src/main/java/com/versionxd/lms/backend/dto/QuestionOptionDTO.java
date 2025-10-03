@@ -1,5 +1,6 @@
 package com.versionxd.lms.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -10,5 +11,6 @@ public class QuestionOptionDTO {
     @NotBlank(message = "Option text cannot be blank")
     private String text;
 
+    @JsonProperty("isCorrect")
     private boolean isCorrect;
 }

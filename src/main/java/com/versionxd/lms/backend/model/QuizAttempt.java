@@ -2,41 +2,47 @@ package com.versionxd.lms.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
 @Entity
-@Table(name = "questions")
+@Table(name = "quiz_attempts")
 @Getter
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = {"quiz", "options"})
+@ToString(exclude = {"user", "quiz", "answers"})
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class Question {
+public class QuizAttempt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String text;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id", nullable = false)
     @JsonBackReference
     private Quiz quiz;
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<QuestionOption> options = new ArrayList<>();
+    @Column(nullable = false)
+    private LocalDateTime submittedAt;
 
+    @OneToMany(mappedBy = "quizAttempt", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Answer> answers = new HashSet<>();
+
+    private Double score;
+
+    @PrePersist
+    protected void onSubmit() {
+        submittedAt = LocalDateTime.now();
+    }
 }

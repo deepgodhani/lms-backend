@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.versionxd.lms.backend.model.Quiz;
 import com.versionxd.lms.backend.repository.QuizRepository;
+import com.versionxd.lms.backend.model.Assignment;
+import com.versionxd.lms.backend.repository.AssignmentRepository;
 
 @Service("courseSecurityService")
 public class CourseSecurityService {
@@ -35,6 +37,10 @@ public class CourseSecurityService {
 
     @Autowired
     private QuizRepository quizRepository;
+
+    @Autowired
+    private AssignmentRepository assignmentRepository;
+
 
     public boolean isInstructor(Long courseId, String userEmail) {
         User user = userRepository.findByEmail(userEmail)
@@ -71,4 +77,54 @@ public class CourseSecurityService {
         Long courseId = quiz.getCourse().getId();
         return isInstructor(courseId, userEmail);
     }
+
+    @Transactional(readOnly = true)
+    public boolean isEnrolledInCourseOfQuiz(Long quizId, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                                  .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        Quiz quiz = quizRepository.findById(quizId)
+                                  .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz not found"));
+
+        Long courseId = quiz.getCourse().getId();
+
+        // --- APPLYING THE SAME FIX HERE ---
+        return courseEnrollmentRepository.findByUser_IdAndCourse_Id(user.getId(), courseId)
+                                         .map(enrollment -> enrollment.getRole() == Role.STUDENT)
+                                         .orElse(false);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isEnrolledInCourseOfLesson(Long lessonId, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                                  .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        Lesson lesson = lessonRepository.findById(lessonId)
+                                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found"));
+
+        Long courseId = lesson.getModule().getCourse().getId();
+
+        // --- APPLYING THE SAME FIX HERE ---
+        return courseEnrollmentRepository.findByUser_IdAndCourse_Id(user.getId(), courseId)
+                                         .map(enrollment -> enrollment.getRole() == Role.STUDENT)
+                                         .orElse(false);
+    }
+    @Transactional(readOnly = true)
+    public boolean isEnrolledInCourseOfAssignment(Long assignmentId, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                                  .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                                                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found"));
+
+        Long courseId = assignment.getCourse().getId();
+
+        // --- THIS IS THE FIX ---
+        // Instead of just checking if the enrollment is present,
+        // we now check if the role within that enrollment is specifically STUDENT.
+        return courseEnrollmentRepository.findByUser_IdAndCourse_Id(user.getId(), courseId)
+                                         .map(enrollment -> enrollment.getRole() == Role.STUDENT)
+                                         .orElse(false);
+    }
+
 }

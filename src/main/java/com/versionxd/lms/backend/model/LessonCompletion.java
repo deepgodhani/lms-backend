@@ -1,0 +1,46 @@
+package com.versionxd.lms.backend.model;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "lesson_completions", uniqueConstraints = {
+        // A user can only complete a specific lesson once.
+        @UniqueConstraint(columnNames = {"user_id", "lesson_id"})
+})
+@Getter
+@Setter
+@NoArgsConstructor
+@EqualsAndHashCode(of = "id")
+public class LessonCompletion {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lesson_id", nullable = false)
+    @JsonBackReference
+    private Lesson lesson;
+
+    @Column(nullable = false)
+    private LocalDateTime completedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        completedAt = LocalDateTime.now();
+    }
+
+    public LessonCompletion(User user, Lesson lesson) {
+        this.user = user;
+        this.lesson = lesson;
+    }
+}

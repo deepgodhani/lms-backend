@@ -6,27 +6,28 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "question_options")
+@Table(name = "answers")
 @Getter
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = "question")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class QuestionOption {
+public class Answer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String text;
-
-    @Column(name = "is_correct", nullable = false)
-    private boolean correct;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quiz_attempt_id", nullable = false)
+    @JsonBackReference
+    private QuizAttempt quizAttempt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", nullable = false)
-    @JsonBackReference
     private Question question;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "selected_option_id", nullable = false)
+    private QuestionOption selectedOption;
 }
