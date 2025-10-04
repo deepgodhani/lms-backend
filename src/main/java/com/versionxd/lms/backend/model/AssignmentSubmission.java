@@ -31,14 +31,9 @@ public class AssignmentSubmission {
     @Column(nullable = false)
     private LocalDateTime submittedAt;
 
-    // This will store the path or identifier for the submitted file
     @Column(nullable = false)
     private String filePath;
 
-    // We can add fields for grading later
-    // private Double grade;
-    // @Lob
-    // private String feedback;
 
     @PrePersist
     protected void onSubmit() {

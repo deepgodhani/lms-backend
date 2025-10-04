@@ -33,10 +33,7 @@ public class AuthController {
         this.jwtService = jwtService;
     }
 
-    /**
-     * Handles the user registration request.
-     * The @Valid annotation triggers the validation rules in RegisterRequest.
-     */
+  
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         authService.register(registerRequest);

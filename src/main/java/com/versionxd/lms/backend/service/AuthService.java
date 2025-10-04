@@ -37,12 +37,12 @@ public class AuthService {
     @Autowired
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
                        AuthenticationManager authenticationManager, JwtService jwtService,
-                       SystemRoleRepository systemRoleRepository) { // 2. Add to constructor
+                       SystemRoleRepository systemRoleRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
-        this.systemRoleRepository = systemRoleRepository; // 3. Initialize it
+        this.systemRoleRepository = systemRoleRepository;
     }
 
     @Transactional
@@ -57,7 +57,6 @@ public class AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        // 4. Find the default role and assign it to the new user
         SystemRole userRole = systemRoleRepository.findByName(SystemRoleName.ROLE_USER)
                                                   .orElseThrow(() -> new RuntimeException("Error: Default role not found."));
         user.setSystemRoles(new HashSet<>(Collections.singletonList(userRole)));

@@ -12,18 +12,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * This class handles exceptions globally across the whole application.
- * It provides consistent, structured error responses.
- */
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * Handles validation exceptions from @Valid.
-     * @param ex The exception thrown when validation fails.
-     * @return A map containing structured error details.
-     */
+
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Map<String, Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
@@ -31,7 +24,6 @@ public class GlobalExceptionHandler {
         response.put("timestamp", LocalDateTime.now());
         response.put("status", HttpStatus.BAD_REQUEST.value());
 
-        // Collect all validation error messages into a map of field -> message
         Map<String, String> errors = ex.getBindingResult().getFieldErrors().stream()
                                        .collect(Collectors.toMap(
                                                fieldError -> fieldError.getField(),
@@ -42,11 +34,6 @@ public class GlobalExceptionHandler {
         return response;
     }
 
-    /**
-     * Handles the specific exception for when a user already exists.
-     * @param ex The custom exception.
-     * @return A ResponseEntity with a structured error message.
-     */
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handleUserAlreadyExists(UserAlreadyExistsException ex) {
         Map<String, Object> response = new HashMap<>();

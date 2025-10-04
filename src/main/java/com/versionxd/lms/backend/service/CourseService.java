@@ -22,28 +22,25 @@ public class CourseService {
 
     private final CourseRepository courseRepository;
     private final CourseEnrollmentRepository courseEnrollmentRepository;
-    private final UserRepository userRepository; // <-- ADD THIS
+    private final UserRepository userRepository;
 
     @Autowired
     public CourseService(CourseRepository courseRepository, CourseEnrollmentRepository courseEnrollmentRepository, UserRepository userRepository) { // <-- UPDATE CONSTRUCTOR
         this.courseRepository = courseRepository;
         this.courseEnrollmentRepository = courseEnrollmentRepository;
-        this.userRepository = userRepository; // <-- ADD THIS
+        this.userRepository = userRepository;
     }
 
     @Transactional
     public Course createCourse(CreateCourseRequest createCourseRequest, User instructor) {
-        // Re-fetch the user to ensure it's a managed entity in the current session
         User managedInstructor = userRepository.findById(instructor.getId())
                                                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + instructor.getId()));
 
-        // Create and save the new course
         Course course = new Course();
         course.setTitle(createCourseRequest.getTitle());
         course.setDescription(createCourseRequest.getDescription());
         Course savedCourse = courseRepository.save(course);
 
-        // Automatically enroll the creator as the instructor
         CourseEnrollment enrollment = new CourseEnrollment(managedInstructor, savedCourse, Role.INSTRUCTOR);
         courseEnrollmentRepository.save(enrollment);
 
@@ -52,11 +49,9 @@ public class CourseService {
 
     @Transactional
     public CourseEnrollment joinCourse(Long courseId, User student) {
-        // Re-fetch the user to ensure it's a managed entity in the current session
         User managedStudent = userRepository.findById(student.getId())
                                             .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + student.getId()));
 
-        // Check if the user is already enrolled
         if (courseEnrollmentRepository.findByUser_IdAndCourse_Id(managedStudent.getId(), courseId).isPresent()) {
             throw new UserAlreadyEnrolledException("User is already enrolled in this course.");
         }
@@ -65,7 +60,6 @@ public class CourseService {
         Course course = courseRepository.findById(courseId)
                                         .orElseThrow(() -> new CourseNotFoundException("Course not found with ID: " + courseId));
 
-        // Enroll the user as a student
         CourseEnrollment enrollment = new CourseEnrollment(managedStudent, course, Role.STUDENT);
         return courseEnrollmentRepository.save(enrollment);
     }

@@ -6,6 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LessonCompletionRepository extends JpaRepository<LessonCompletion, Long> {
-    // A quick way to check if a record already exists.
     boolean existsByUser_IdAndLesson_Id(Long userId, Long lessonId);
 }

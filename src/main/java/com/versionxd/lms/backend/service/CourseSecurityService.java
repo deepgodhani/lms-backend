@@ -88,7 +88,6 @@ public class CourseSecurityService {
 
         Long courseId = quiz.getCourse().getId();
 
-        // --- APPLYING THE SAME FIX HERE ---
         return courseEnrollmentRepository.findByUser_IdAndCourse_Id(user.getId(), courseId)
                                          .map(enrollment -> enrollment.getRole() == Role.STUDENT)
                                          .orElse(false);
@@ -104,7 +103,6 @@ public class CourseSecurityService {
 
         Long courseId = lesson.getModule().getCourse().getId();
 
-        // --- APPLYING THE SAME FIX HERE ---
         return courseEnrollmentRepository.findByUser_IdAndCourse_Id(user.getId(), courseId)
                                          .map(enrollment -> enrollment.getRole() == Role.STUDENT)
                                          .orElse(false);
@@ -119,9 +117,6 @@ public class CourseSecurityService {
 
         Long courseId = assignment.getCourse().getId();
 
-        // --- THIS IS THE FIX ---
-        // Instead of just checking if the enrollment is present,
-        // we now check if the role within that enrollment is specifically STUDENT.
         return courseEnrollmentRepository.findByUser_IdAndCourse_Id(user.getId(), courseId)
                                          .map(enrollment -> enrollment.getRole() == Role.STUDENT)
                                          .orElse(false);

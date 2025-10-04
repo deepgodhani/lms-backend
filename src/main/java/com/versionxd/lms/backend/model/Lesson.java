@@ -20,9 +20,6 @@ public class Lesson {
     @Column(nullable = false)
     private String title;
 
-    // We can add content fields here later
-    // @Lob
-    // private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "module_id", nullable = false)

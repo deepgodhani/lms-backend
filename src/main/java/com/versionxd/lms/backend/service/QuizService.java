@@ -61,12 +61,10 @@ public class QuizService {
         Quiz quiz = quizRepository.findById(quizId)
                                   .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz not found"));
 
-        // Create the question
         Question question = new Question();
         question.setText(questionDTO.getText());
         question.setQuiz(quiz);
 
-        // Create and associate the options
         for (QuestionOptionDTO optionDTO : questionDTO.getOptions()) {
             QuestionOption option = new QuestionOption();
             option.setText(optionDTO.getText());
@@ -93,7 +91,6 @@ public class QuizService {
 
         int correctAnswers = 0;
 
-        // Fetch all question options at once to reduce database calls
         List<Long> optionIds = submissionDTO.getAnswers().stream().map(AnswerDTO::getSelectedOptionId).collect(Collectors.toList());
         Map<Long, QuestionOption> optionsMap = questionOptionRepository.findAllById(optionIds).stream()
                                                                        .collect(Collectors.toMap(QuestionOption::getId, option -> option));

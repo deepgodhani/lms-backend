@@ -1,7 +1,7 @@
 package com.versionxd.lms.backend.controller;
 
 import com.versionxd.lms.backend.dto.ModuleDTO;
-import com.versionxd.lms.backend.service.ModuleService; // <-- Import new service
+import com.versionxd.lms.backend.service.ModuleService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "lesson_completions", uniqueConstraints = {
-        // A user can only complete a specific lesson once.
         @UniqueConstraint(columnNames = {"user_id", "lesson_id"})
 })
 @Getter

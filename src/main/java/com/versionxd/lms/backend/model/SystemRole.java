@@ -12,7 +12,6 @@ public class SystemRole {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 1. Change the type to our new enum
     @Enumerated(EnumType.STRING)
     @Column(length = 20, unique = true, nullable = false)
     private SystemRoleName name;

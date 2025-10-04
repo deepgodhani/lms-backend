@@ -31,10 +31,7 @@ public class ProgressService {
         User user = userRepository.findById(currentUser.getId())
                                   .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // To prevent errors, first check if the completion record already exists.
         if (lessonCompletionRepository.existsByUser_IdAndLesson_Id(user.getId(), lesson.getId())) {
-            // The lesson is already marked as complete.
-            // We can just return successfully without doing anything.
             return;
         }
 
