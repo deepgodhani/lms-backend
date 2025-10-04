@@ -17,7 +17,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = {"enrollments", "modules", "quizzes"})
+@ToString(exclude = {"enrollments", "modules", "quizzes", "assignments", "announcements", "discussionThreads"})
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Course {
 
@@ -46,5 +46,13 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private Set<Assignment> assignments = new HashSet<>();
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private Set<Announcement> announcements = new HashSet<>();
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private Set<DiscussionThread> discussionThreads = new HashSet<>();
 
 }

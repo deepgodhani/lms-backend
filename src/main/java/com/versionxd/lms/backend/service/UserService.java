@@ -1,5 +1,6 @@
 package com.versionxd.lms.backend.service;
 
+import com.versionxd.lms.backend.dto.UserProfileDTO;
 import com.versionxd.lms.backend.model.Course;
 import com.versionxd.lms.backend.model.CourseEnrollment;
 import com.versionxd.lms.backend.model.User;
@@ -30,5 +31,27 @@ public class UserService {
         return userWithCourses.getEnrollments().stream()
                               .map(CourseEnrollment::getCourse)
                               .collect(Collectors.toList());
+    }
+
+    public UserProfileDTO getUserProfile(User currentUser) {
+        UserProfileDTO profileDTO = new UserProfileDTO();
+        profileDTO.setId(currentUser.getId());
+        profileDTO.setFirstName(currentUser.getFirstName());
+        profileDTO.setLastName(currentUser.getLastName());
+        profileDTO.setEmail(currentUser.getEmail());
+        return profileDTO;
+    }
+
+    @Transactional
+    public UserProfileDTO updateUserProfile(User currentUser, UserProfileDTO profileUpdateDTO) {
+        User user = userRepository.findById(currentUser.getId())
+                                  .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        user.setFirstName(profileUpdateDTO.getFirstName());
+        user.setLastName(profileUpdateDTO.getLastName());
+
+        User updatedUser = userRepository.save(user);
+
+        return getUserProfile(updatedUser);
     }
 }

@@ -127,4 +127,12 @@ public class CourseSecurityService {
                                          .orElse(false);
     }
 
+    @Transactional(readOnly = true)
+    public boolean isEnrolledInCourse(Long courseId, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                                  .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return courseEnrollmentRepository.findByUser_IdAndCourse_Id(user.getId(), courseId).isPresent();
+    }
+
 }
