@@ -10,16 +10,25 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/courses/{courseId}/announcements")
+@RequestMapping("/api/announcements")
 public class AnnouncementController {
 
     @Autowired
     private AnnouncementService announcementService;
 
-    @PostMapping
-    @PreAuthorize("@courseSecurityService.isInstructor(#courseId, principal.username)")
-    public ResponseEntity<AnnouncementDTO> createAnnouncement(@PathVariable Long courseId, @Valid @RequestBody AnnouncementDTO announcementDTO) {
-        AnnouncementDTO createdAnnouncement = announcementService.createAnnouncement(courseId, announcementDTO);
-        return new ResponseEntity<>(createdAnnouncement, HttpStatus.CREATED);
+
+
+    @PutMapping("/{announcementId}")
+    @PreAuthorize("@courseSecurityService.isInstructorForAnnouncement(#announcementId, principal.username)")
+    public ResponseEntity<AnnouncementDTO> updateAnnouncement(@PathVariable Long announcementId, @Valid @RequestBody AnnouncementDTO announcementDTO) {
+        AnnouncementDTO updatedAnnouncement = announcementService.updateAnnouncement(announcementId, announcementDTO);
+        return ResponseEntity.ok(updatedAnnouncement);
+    }
+
+    @DeleteMapping("/{announcementId}")
+    @PreAuthorize("@courseSecurityService.isInstructorForAnnouncement(#announcementId, principal.username)")
+    public ResponseEntity<Void> deleteAnnouncement(@PathVariable Long announcementId) {
+        announcementService.deleteAnnouncement(announcementId);
+        return ResponseEntity.noContent().build();
     }
 }

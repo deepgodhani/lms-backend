@@ -1,10 +1,17 @@
 package com.versionxd.lms.backend.repository;
 
+import java.util.Set;
+
 import com.versionxd.lms.backend.model.LessonCompletion;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LessonCompletionRepository extends JpaRepository<LessonCompletion, Long> {
-    boolean existsByUser_IdAndLesson_Id(Long userId, Long lessonId);
+    boolean existsByUserIdAndLessonId(Long userId, Long lessonId);
+
+    @Query("SELECT lc.lesson.id FROM LessonCompletion lc WHERE lc.user.id = :userId AND lc.lesson.module.course.id = :courseId")
+    Set<Long> findCompletedLessonIdsByUserIdAndCourseId(@Param("userId") Long userId, @Param("courseId") Long courseId);
 }

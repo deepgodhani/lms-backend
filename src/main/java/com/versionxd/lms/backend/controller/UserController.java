@@ -1,5 +1,6 @@
 package com.versionxd.lms.backend.controller;
 
+import com.versionxd.lms.backend.dto.CourseDTO;
 import com.versionxd.lms.backend.dto.UserProfileDTO;
 import com.versionxd.lms.backend.model.Course;
 import com.versionxd.lms.backend.model.User;
@@ -28,8 +29,8 @@ public class UserController {
     }
 
     @GetMapping("/my-courses")
-    public ResponseEntity<List<Course>> getMyCourses(@AuthenticationPrincipal User currentUser) {
-        List<Course> courses = userService.getMyCourses(currentUser);
+    public ResponseEntity<List<CourseDTO>> getMyCourses(@AuthenticationPrincipal User currentUser) { // <-- Change return type
+        List<CourseDTO> courses = userService.getMyCourses(currentUser);
         return ResponseEntity.ok(courses);
     }
 

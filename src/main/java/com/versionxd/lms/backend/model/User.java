@@ -1,34 +1,17 @@
 package com.versionxd.lms.backend.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
 @Entity
 @Table(name = "users")
-@Getter
-@Setter
-@NoArgsConstructor
-@EqualsAndHashCode(of = "id")
-@ToString(exclude = "enrollments")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User implements UserDetails {
 
     @Id
@@ -47,8 +30,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    @JsonIgnore
+    // --- THIS IS THE LINE TO CHANGE ---
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<CourseEnrollment> enrollments = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -57,24 +40,80 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<SystemRole> systemRoles = new HashSet<>();
 
+    // Constructors
+    public User() {
+    }
 
+    // Getters and setters for all fields...
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Set<CourseEnrollment> getEnrollments() {
+        return enrollments;
+    }
+
+    public void setEnrollments(Set<CourseEnrollment> enrollments) {
+        this.enrollments = enrollments;
+    }
+
+    public Set<SystemRole> getSystemRoles() {
+        return systemRoles;
+    }
+
+    public void setSystemRoles(Set<SystemRole> systemRoles) {
+        this.systemRoles = systemRoles;
+    }
+
+    // UserDetails implementation
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // This now correctly provides authorities like "ROLE_USER" to Spring Security
         return systemRoles.stream()
                           .map(role -> new SimpleGrantedAuthority(role.getName().name()))
                           .collect(Collectors.toList());
     }
 
     @Override
-    public String getUsername() {
-        return this.email;
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override
-    public String getPassword() {
-        return this.password;
+    public String getUsername() {
+        return email;
     }
 
     @Override

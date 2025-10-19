@@ -1,5 +1,8 @@
 package com.versionxd.lms.backend.dto;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -12,4 +15,8 @@ public class DiscussionThreadDTO {
 
     @NotBlank(message = "Initial post content cannot be blank")
     private String content;
+
+    private UserProfileDTO author;
+    private LocalDateTime createdAt;
+    private List<DiscussionPostDTO> posts;
 }

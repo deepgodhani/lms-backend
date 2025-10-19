@@ -44,6 +44,34 @@ public class LessonService {
 
         return toDTO(lesson);
     }
+    @Transactional(readOnly = true)
+    public LessonDTO getLessonById(Long lessonId) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found"));
+        return toDTO(lesson);
+    }
+
+    @Transactional
+    public LessonDTO updateLesson(Long lessonId, LessonDTO lessonDTO) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found"));
+
+        lesson.setTitle(lessonDTO.getTitle());
+        lesson.setContent(lessonDTO.getContent());
+
+        Lesson updatedLesson = lessonRepository.save(lesson);
+        return toDTO(updatedLesson);
+    }
+
+    @Transactional
+    public void deleteLesson(Long lessonId) {
+        if (!lessonRepository.existsById(lessonId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found");
+        }
+        lessonRepository.deleteById(lessonId);
+    }
+
+
 
     private LessonDTO toDTO(Lesson lesson) {
         LessonDTO dto = new LessonDTO();

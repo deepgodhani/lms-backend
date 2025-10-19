@@ -31,7 +31,7 @@ public class ProgressService {
         User user = userRepository.findById(currentUser.getId())
                                   .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        if (lessonCompletionRepository.existsByUser_IdAndLesson_Id(user.getId(), lesson.getId())) {
+        if (lessonCompletionRepository.existsByUserIdAndLessonId(user.getId(), lesson.getId())) {
             return;
         }
 

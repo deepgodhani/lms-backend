@@ -70,7 +70,6 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
 
-        // --- ADD THE JWT FILTER TO THE CHAIN ---
         // This makes sure our filter runs before Spring's standard authentication filter
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

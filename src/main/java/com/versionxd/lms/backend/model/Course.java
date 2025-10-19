@@ -31,7 +31,7 @@ public class Course {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @OneToMany(mappedBy = "course")
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private Set<CourseEnrollment> enrollments = new HashSet<>();
 

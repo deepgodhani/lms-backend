@@ -8,4 +8,5 @@ public class QuizDTO {
     private Long id;
     @NotBlank(message = "Quiz title cannot be blank")
     private String title;
+    private String description;
 }

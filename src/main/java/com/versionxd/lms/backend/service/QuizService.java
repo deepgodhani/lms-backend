@@ -1,5 +1,8 @@
 package com.versionxd.lms.backend.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,19 +14,25 @@ import com.versionxd.lms.backend.dto.QuestionOptionDTO;
 import com.versionxd.lms.backend.dto.QuizDTO;
 import com.versionxd.lms.backend.dto.QuizResultDTO;
 import com.versionxd.lms.backend.dto.QuizSubmissionDTO;
+import com.versionxd.lms.backend.dto.ai.GeneratedQuestionDTO;
 import com.versionxd.lms.backend.exception.CourseNotFoundException;
 import com.versionxd.lms.backend.model.Answer;
 import com.versionxd.lms.backend.model.Course;
+import com.versionxd.lms.backend.model.CourseEnrollment;
 import com.versionxd.lms.backend.model.Question;
 import com.versionxd.lms.backend.model.QuestionOption;
 import com.versionxd.lms.backend.model.Quiz;
 import com.versionxd.lms.backend.model.QuizAttempt;
+import com.versionxd.lms.backend.model.QuizVariant;
+import com.versionxd.lms.backend.model.Role;
 import com.versionxd.lms.backend.model.User;
+import com.versionxd.lms.backend.repository.CourseEnrollmentRepository;
 import com.versionxd.lms.backend.repository.CourseRepository;
 import com.versionxd.lms.backend.repository.QuestionOptionRepository;
 import com.versionxd.lms.backend.repository.QuestionRepository;
 import com.versionxd.lms.backend.repository.QuizAttemptRepository;
 import com.versionxd.lms.backend.repository.QuizRepository;
+import com.versionxd.lms.backend.repository.QuizVariantRepository;
 import com.versionxd.lms.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,6 +50,11 @@ public class QuizService {
     @Autowired private QuizAttemptRepository quizAttemptRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private QuestionOptionRepository questionOptionRepository;
+    @Autowired
+    private QuizVariantRepository quizVariantRepository;
+    @Autowired
+    private CourseEnrollmentRepository courseEnrollmentRepository;
+
 
     @Transactional
     public QuizDTO createQuiz(Long courseId, QuizDTO quizDTO) {
@@ -137,7 +151,60 @@ public class QuizService {
 
         return toResultDTO(mostRecentAttempt);
     }
+    @Transactional(readOnly = true)
+    public QuizDTO getQuizById(Long quizId) {
+        Quiz quiz = quizRepository.findById(quizId)
+                                  .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz not found"));
+        return toDTO(quiz);
+    }
 
+    @Transactional
+    public QuizDTO updateQuiz(Long quizId, QuizDTO quizDTO) {
+        Quiz quiz = quizRepository.findById(quizId)
+                                  .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz not found"));
+
+        quiz.setTitle(quizDTO.getTitle());
+        Quiz updatedQuiz = quizRepository.save(quiz);
+        return toDTO(updatedQuiz);
+    }
+
+    @Transactional
+    public void deleteQuiz(Long quizId) {
+        if (!quizRepository.existsById(quizId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz not found");
+        }
+        quizRepository.deleteById(quizId);
+    }
+
+    @Transactional
+    public QuestionDTO updateQuestion(Long questionId, QuestionDTO questionDTO) {
+        Question question = questionRepository.findById(questionId)
+                                              .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Question not found"));
+
+        question.setText(questionDTO.getText());
+        // Clear old options and add new ones to handle updates, additions, or removals
+        question.getOptions().clear();
+        questionRepository.save(question); // Save to persist the clear operation
+
+        for (QuestionOptionDTO optionDTO : questionDTO.getOptions()) {
+            QuestionOption option = new QuestionOption();
+            option.setText(optionDTO.getText());
+            option.setCorrect(optionDTO.isCorrect());
+            option.setQuestion(question);
+            question.getOptions().add(option);
+        }
+
+        Question updatedQuestion = questionRepository.save(question);
+        return toDTO(updatedQuestion);
+    }
+
+    @Transactional
+    public void deleteQuestion(Long questionId) {
+        if (!questionRepository.existsById(questionId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Question not found");
+        }
+        questionRepository.deleteById(questionId);
+    }
 
     private QuizDTO toDTO(Quiz quiz) {
         QuizDTO dto = new QuizDTO();
@@ -179,5 +246,132 @@ public class QuizService {
 
         resultDTO.setAnswers(answerResults);
         return resultDTO;
+    }
+
+    @Transactional
+    public List<QuestionDTO> addGeneratedQuestionsToQuiz(Long quizId, List<GeneratedQuestionDTO> generatedQuestions) {
+        Quiz quiz = quizRepository.findById(quizId)
+                                  .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz not found"));
+
+        List<Question> questionsToAdd = new ArrayList<>();
+
+        for (GeneratedQuestionDTO generatedQuestion : generatedQuestions) {
+            Question question = new Question();
+            question.setText(generatedQuestion.getQuestionText());
+            question.setQuiz(quiz);
+
+            for (QuestionOptionDTO optionDTO : generatedQuestion.getOptions()) {
+                QuestionOption option = new QuestionOption();
+                option.setText(optionDTO.getText());
+                option.setCorrect(optionDTO.isCorrect());
+                option.setQuestion(question);
+                question.getOptions().add(option);
+            }
+            questionsToAdd.add(question);
+        }
+
+        List<Question> savedQuestions = questionRepository.saveAll(questionsToAdd);
+        return savedQuestions.stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void generateQuizVariants(Long quizId, int numberOfVariants) {
+        Quiz quiz = quizRepository.findById(quizId)
+                                  .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz not found"));
+
+        List<Question> allQuestions = new ArrayList<>(quiz.getQuestions());
+        Collections.shuffle(allQuestions);
+
+        int questionsPerVariant = allQuestions.size() / numberOfVariants;
+
+        for (int i = 0; i < numberOfVariants; i++) {
+            QuizVariant variant = new QuizVariant();
+            variant.setQuiz(quiz);
+            variant.setName("Set " + (char)('A' + i));
+
+            int start = i * questionsPerVariant;
+            int end = start + questionsPerVariant;
+
+            if (i == numberOfVariants - 1) {
+                // Add any remaining questions to the last variant
+                end = allQuestions.size();
+            }
+
+            List<Question> variantQuestions = allQuestions.subList(start, end);
+            for (Question q : variantQuestions) {
+                // you would use a join table (`QuizVariantQuestion`)
+                // to associate questions with variants.
+            }
+            quizVariantRepository.save(variant);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<QuestionDTO> getQuizQuestionsForStudent(Long quizId, User currentUser) {
+        Quiz quiz = quizRepository.findById(quizId)
+                                  .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz not found"));
+
+        List<QuizVariant> variants = new ArrayList<>(quiz.getVariants());
+        if (variants.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This quiz has no variants generated.");
+        }
+
+        // Get all student enrollments for the course and sort them to create a consistent order
+        List<CourseEnrollment> studentEnrollments = quiz.getCourse().getEnrollments().stream()
+                                                        .filter(e -> e.getRole() == Role.STUDENT)
+                                                        .sorted(Comparator.comparing(e -> e.getUser().getId()))
+                                                        .collect(Collectors.toList());
+
+        // Find the position (index) of the current student in the sorted list
+        int studentIndex = -1;
+        for (int i = 0; i < studentEnrollments.size(); i++) {
+            if (studentEnrollments.get(i).getUser().getId().equals(currentUser.getId())) {
+                studentIndex = i;
+                break;
+            }
+        }
+
+        if (studentIndex == -1) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not enrolled as a student in this course.");
+        }
+
+        // Use the modulus operator to assign a variant. This is the core of your unique logic!
+        // studentIndex 0 gets variant 0, index 1 gets variant 1, index 2 gets variant 0 (if 2 variants), etc.
+        QuizVariant assignedVariant = variants.get(studentIndex % variants.size());
+
+        // Return the questions for the assigned variant
+        return assignedVariant.getQuestions().stream()
+                              .map(this::toDTO) // We can reuse the existing toDTO(Question) method
+                              .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<QuizDTO> getQuizzesForCourse(Long courseId) {
+        if (!courseRepository.existsById(courseId)) {
+            throw new CourseNotFoundException("Course not found with id: " + courseId);
+        }
+        // This assumes a findByCourseId method in QuizRepository
+        return quizRepository.findAll().stream()
+                             .filter(quiz -> quiz.getCourse().getId().equals(courseId))
+                             .map(this::toDTO)
+                             .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public QuestionDTO getQuestionById(Long questionId) {
+        Question question = questionRepository.findById(questionId)
+                                              .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Question not found"));
+        return toDTO(question);
+    }
+
+    @Transactional(readOnly = true)
+    public List<QuestionDTO> getQuestionsForQuiz(Long quizId) {
+        if (!quizRepository.existsById(quizId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz not found");
+        }
+        return questionRepository.findAll().stream()
+                                 .filter(q -> q.getQuiz().getId().equals(quizId))
+                                 .map(this::toDTO)
+                                 .collect(Collectors.toList());
     }
 }

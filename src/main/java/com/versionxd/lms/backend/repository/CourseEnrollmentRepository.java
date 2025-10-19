@@ -13,5 +13,5 @@ public interface CourseEnrollmentRepository extends JpaRepository<CourseEnrollme
      * Finds a specific enrollment record based on the user's ID and the course's ID.
      * This will be the most common query you run to check a user's permissions for a course.
      */
-    Optional<CourseEnrollment> findByUser_IdAndCourse_Id(Long userId, Long courseId);
+    Optional<CourseEnrollment> findByUserIdAndCourseId(Long userId, Long courseId);
 }
