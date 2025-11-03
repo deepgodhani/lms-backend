@@ -1,3 +1,4 @@
+// lms-backend/src/main/java/com/versionxd/lms/backend/model/Course.java
 package com.versionxd.lms.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -17,7 +18,8 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = {"enrollments", "modules", "quizzes", "assignments", "announcements", "discussionThreads"})
+// Add "liveClasses" to the exclude
+@ToString(exclude = {"enrollments", "modules", "quizzes", "assignments", "announcements", "discussionThreads", "liveClasses"})
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Course {
 
@@ -54,5 +56,10 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private Set<DiscussionThread> discussionThreads = new HashSet<>();
+
+    // --- NEW RELATIONSHIP ---
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private Set<LiveClass> liveClasses = new HashSet<>();
 
 }

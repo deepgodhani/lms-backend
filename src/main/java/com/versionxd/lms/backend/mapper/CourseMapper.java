@@ -1,3 +1,4 @@
+// lms-backend/src/main/java/com/versionxd/lms/backend/mapper/CourseMapper.java
 package com.versionxd.lms.backend.mapper;
 
 import com.versionxd.lms.backend.dto.*; // Import all DTOs
@@ -58,8 +59,6 @@ public class CourseMapper {
             courseDTO.setAssignments(Collections.emptyList());
         }
 
-        // --- THIS IS THE FIX ---
-        // This block converts the list of Quiz entities into QuizDTOs
         if (course.getQuizzes() != null) {
             List<QuizDTO> quizDTOs = course.getQuizzes().stream()
                                            .map(this::toQuizDTO)
@@ -68,7 +67,17 @@ public class CourseMapper {
         } else {
             courseDTO.setQuizzes(Collections.emptyList());
         }
-        // -----------------------
+
+        // --- NEW MAPPING FOR LIVE CLASSES ---
+        if (course.getLiveClasses() != null) {
+            List<LiveClassDTO> liveClassDTOs = course.getLiveClasses().stream()
+                                                     .map(this::toLiveClassDTO)
+                                                     .collect(Collectors.toList());
+            courseDTO.setLiveClasses(liveClassDTOs);
+        } else {
+            courseDTO.setLiveClasses(Collections.emptyList());
+        }
+        // ------------------------------------
 
         return courseDTO;
     }
@@ -83,13 +92,32 @@ public class CourseMapper {
         return dto;
     }
 
-    // --- HELPER METHOD TO MAP A SINGLE QUIZ ---
     private QuizDTO toQuizDTO(Quiz quiz) {
         if (quiz == null) { return null; }
         QuizDTO dto = new QuizDTO();
         dto.setId(quiz.getId());
         dto.setTitle(quiz.getTitle());
         dto.setDescription(quiz.getDescription());
+        return dto;
+    }
+
+    // --- NEW HELPER METHOD FOR LIVE CLASS ---
+    private LiveClassDTO toLiveClassDTO(LiveClass liveClass) {
+        if (liveClass == null) { return null; }
+        LiveClassDTO dto = new LiveClassDTO();
+        dto.setId(liveClass.getId());
+        dto.setTitle(liveClass.getTitle());
+        if (liveClass.getCourse() != null) {
+            dto.setCourseId(liveClass.getCourse().getId());
+        }
+        if (liveClass.getInstructor() != null) {
+            dto.setInstructorName(liveClass.getInstructor().getFirstName() + " " + liveClass.getInstructor().getLastName());
+        }
+        dto.setStatus(liveClass.getStatus());
+        dto.setScheduledAt(liveClass.getScheduledAt());
+        dto.setStartedAt(liveClass.getStartedAt());
+        dto.setEndedAt(liveClass.getEndedAt());
+        dto.setRoomUrl(liveClass.getRoomUrl());
         return dto;
     }
 }

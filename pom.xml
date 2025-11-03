@@ -27,9 +27,9 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>24</java.version>
-		<maven.compiler.source>24</maven.compiler.source>
-		<maven.compiler.target>24</maven.compiler.target>
+		<java.version>17</java.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -107,8 +107,20 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-hibernate5</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.corundumstudio.socketio</groupId>
+            <artifactId>netty-socketio</artifactId>
+            <version>1.7.19</version>
+        </dependency>
 
     </dependencies>
+
+
 
 	<build>
 		<plugins>

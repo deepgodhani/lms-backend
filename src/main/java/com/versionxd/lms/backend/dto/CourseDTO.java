@@ -11,4 +11,5 @@ public class CourseDTO {
     private List<ModuleDTO> modules;
     private List<AssignmentDTO> assignments;
     private List<QuizDTO> quizzes;
+    private List<LiveClassDTO> liveClasses;
 }
