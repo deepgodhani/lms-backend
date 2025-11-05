@@ -10,15 +10,17 @@ import org.springframework.stereotype.Controller;
 public class LiveClassWebSocketController {
 
     /**
-     * This method handles messages sent to "/app/live-class/{classId}".
-     * The @SendTo annotation broadcasts the return value to all subscribers of "/topic/live-class/{classId}".
+     * This method handles all actions sent to "/app/live-class/{classId}".
+     * It simply broadcasts the message to all subscribers of "/topic/live-class/{classId}".
+     * The frontend logic will decide what to do with the message based on its 'type'.
      */
     @MessageMapping("/live-class/{classId}")
     @SendTo("/topic/live-class/{classId}")
     public WebSocketMessage handleClassAction(@DestinationVariable String classId, WebSocketMessage message) {
-        // For now, we just log the received message and broadcast it back.
-        // In the future, we can add logic here to save state, check permissions, etc.
+
         System.out.println("Received action for class " + classId + ": " + message.getType());
+
+        // Broadcast the message (DRAW, CLEAR_CANVAS, CODE_UPDATE, etc.)
         return message;
     }
 }
