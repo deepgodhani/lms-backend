@@ -36,8 +36,8 @@ public class DiscussionController {
 
     @PostMapping("/{threadId}/posts")
     @PreAuthorize("@courseSecurityService.isEnrolledInCourseOfDiscussion(#threadId, principal.username)")
-    public ResponseEntity<DiscussionPostDTO> addPostToThread(@PathVariable Long threadId, @RequestBody String content, @AuthenticationPrincipal User currentUser) {
-        DiscussionPostDTO newPost = discussionService.addPostToThread(threadId, content, currentUser);
+    public ResponseEntity<DiscussionPostDTO> addPostToThread(@PathVariable Long threadId,@Valid @RequestBody DiscussionPostDTO postDTO, @AuthenticationPrincipal User currentUser) {
+        DiscussionPostDTO newPost = discussionService.addPostToThread(threadId, postDTO.getContent(), currentUser);
         return new ResponseEntity<>(newPost, HttpStatus.CREATED);
     }
 

@@ -51,6 +51,14 @@ public class CourseSecurityService {
         return courseEnrollmentRepository.findByUserIdAndCourseId(user.getId(), courseId).isPresent();
     }
 
+    @Transactional(readOnly = true)
+    public boolean isEnrolledInCourseOfLesson(Long lessonId, String userEmail) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found"));
+        Long courseId = lesson.getModule().getCourse().getId();
+        return isEnrolledInCourse(courseId, userEmail);
+    }
+
     // --- THIS IS THE MISSING METHOD ---
     @Transactional(readOnly = true)
     public boolean isEnrolledInCourseOfQuiz(Long quizId, String userEmail) {
@@ -180,5 +188,13 @@ public class CourseSecurityService {
                                                       .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
         Long courseId = post.getThread().getCourse().getId();
         return isInstructor(courseId, userEmail);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isEnrolledInCourseOfAssignment(Long assignmentId, String userEmail) {
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                                                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found"));
+        Long courseId = assignment.getCourse().getId();
+        return isEnrolledInCourse(courseId, userEmail);
     }
 }

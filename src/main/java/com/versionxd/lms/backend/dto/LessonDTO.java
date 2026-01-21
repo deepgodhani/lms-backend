@@ -1,16 +1,12 @@
 package com.versionxd.lms.backend.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
 public class LessonDTO {
     private Long id;
-
-    @NotBlank(message = "Lesson title cannot be blank")
     private String title;
-
     private String content;
-
-    private boolean isCompleted;
+    private boolean completed;
+    private Long courseId; // <-- ADD THIS LINE
 }

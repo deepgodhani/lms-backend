@@ -1,12 +1,14 @@
 package com.versionxd.lms.backend.controller;
 
 import com.versionxd.lms.backend.dto.LessonDTO;
+import com.versionxd.lms.backend.model.User;
 import com.versionxd.lms.backend.service.LessonService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,8 +29,8 @@ public class LessonController {
 
     @GetMapping("/{lessonId}")
     @PreAuthorize("@courseSecurityService.isEnrolledInCourseOfLesson(#lessonId, principal.username)")
-    public ResponseEntity<LessonDTO> getLessonById(@PathVariable Long lessonId) {
-        LessonDTO lesson = lessonService.getLessonById(lessonId);
+    public ResponseEntity<LessonDTO> getLessonById(@PathVariable Long lessonId,@AuthenticationPrincipal User user) {
+        LessonDTO lesson = lessonService.getLessonById(lessonId,user);
         return ResponseEntity.ok(lesson);
     }
 
