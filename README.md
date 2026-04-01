@@ -187,9 +187,8 @@ Controller → Service → Repository → Database
 
 | # | Limitation | Improvement |
 |---|---|---|
-| 1 | **JWT secret in `application.properties`** — the placeholder value is committed to source. | Store secrets in environment variables or a secrets manager (Vault, AWS Secrets Manager). |
-| 2 | **Socket.IO room state is in-memory** — restarting the server drops all active live-class participants. | Move room/session state to Redis so the service can scale horizontally. |
-| 3 | **AI question generation uses naive string interpolation** for the JSON request body. | Use a proper `ObjectMapper` to serialise the request to avoid JSON injection from lesson content. |
-| 4 | **No file upload support** — assignment submissions are text-only. | Add S3/MinIO-backed file storage for PDF and video submissions. |
-| 5 | **No refresh token mechanism** — JWT expiry (30 days) means users stay logged in very long or get abruptly logged out. | Implement short-lived access tokens + long-lived refresh tokens with rotation. |
-| 6 | **CORS locked to `localhost:3000`** — not configurable without a code change. | Externalise allowed origins to a property so different environments (staging, production) can be configured without rebuilding. |
+| 1 | **Socket.IO room state is in-memory** — restarting the server drops all active live-class participants. | Move room/session state to Redis so the service can scale horizontally. |
+| 2 | **AI question generation uses naive string interpolation** for the JSON request body. | Use a proper `ObjectMapper` to serialise the request to avoid JSON injection from lesson content. |
+| 3 | **No file upload support** — assignment submissions are text-only. | Add S3/MinIO-backed file storage for PDF and video submissions. |
+| 4 | **No refresh token mechanism** — JWT expiry (30 days) means users stay logged in very long or get abruptly logged out. | Implement short-lived access tokens + long-lived refresh tokens with rotation. |
+| 5 | **CORS locked to `localhost:3000`** — not configurable without a code change. | Externalise allowed origins to a property so different environments (staging, production) can be configured without rebuilding. |
